@@ -380,6 +380,24 @@ Sequence numbers are scoped to the category prefix. A sequence number has no mea
 
 Changing the category of a published Rule changes its identity. If a published Rule was assigned to the wrong category and the correction changes the Rule ID, the catalog must preserve traceability according to the rule lifecycle and stability principles.
 
+## Legacy Identifier Compatibility
+
+The official prefix for Events and Messaging is `MSG`.
+
+The official prefix for Solution Architecture is `SOLN`.
+
+The legacy prefix `EVENT` remains compatible with `MSG` for published legacy identifiers only.
+
+The legacy prefix `SOL` remains compatible with `SOLN` for published legacy identifiers only.
+
+`EVENT-001` and `SOL-001` remain valid in v1.0.0 for compatibility, traceability, Evaluation Suite stability, and preservation of existing references.
+
+This compatibility does not change the official prefixes. `MSG` remains the official prefix for Events and Messaging, and `SOLN` remains the official prefix for Solution Architecture.
+
+New Rules must not use the legacy prefixes `EVENT` or `SOL`.
+
+New Rules must use only the official prefixes `MSG` and `SOLN` for these categories.
+
 ## Classification Principles
 
 Classify a Rule by the primary architectural concern it evaluates.

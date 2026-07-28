@@ -1,4 +1,4 @@
-# Solid Checklist
+# SOLID Checklist
 
 - [ ] Evidence available
 - [ ] Applicable rules selected

@@ -1,1 +1,1 @@
-# Ecommerce Sample
+# E-commerce Sample

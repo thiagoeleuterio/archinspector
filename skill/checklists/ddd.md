@@ -1,4 +1,4 @@
-# Ddd Checklist
+# DDD Checklist
 
 - [ ] Evidence available
 - [ ] Applicable rules selected

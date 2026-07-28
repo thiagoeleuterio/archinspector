@@ -20,9 +20,14 @@ The suite validates whether ArchInspector applies existing Rules, catalogs, outc
 evaluation/
 ├── README.md
 ├── EVALUATION_SUITE.md
+├── SCENARIO_CATALOG.md
 ├── SCENARIO_MODEL.md
 ├── EXPECTED_RESULT_MODEL.md
-└── COVERAGE_MODEL.md
+├── COVERAGE_MODEL.md
+├── scenarios/
+├── expected/
+├── reviews/
+└── stabilizations/
 ```
 
 ## Evaluation Workflow
@@ -51,13 +56,13 @@ Commit
 
 ## Scenario Lifecycle
 
-Future scenarios move through `Draft`, `Ready`, `Executed`, `Passed`, `Failed`, `Blocked`, or `Deprecated`.
+Scenarios move through `Draft`, `Ready`, `Executed`, `Passed`, `Failed`, `Blocked`, or `Deprecated`.
 
 A scenario must define identity, category, target Rules, artifacts, evidence provided, evidence withheld, expected findings, expected outcomes, expected non-findings, guards, boundaries, execution instructions, acceptance criteria, failure criteria, and traceability.
 
 ## Result Lifecycle
 
-Future expected results define the gold standard for scenario comparison.
+Expected results define the gold standard for scenario comparison.
 
 Observed results may be classified as `Match`, `Acceptable Variation`, `Mismatch`, `Blocked`, or `Not Executed`.
 
@@ -90,17 +95,18 @@ The suite must not create or alter Rules, catalogs, reviews, stabilizations, con
 ## Current Status
 
 - Evaluation Suite: `Defined`;
+- Scenario Catalog: `Defined`;
 - Scenario Model: `Defined`;
 - Expected Result Model: `Defined`;
 - Coverage Model: `Defined`;
-- Concrete Scenarios: `Not Started`;
+- Concrete Scenarios: `40 Ready`;
+- Expected Results: `40 Match`;
+- Reviews: `Present`;
+- Stabilizations: `Present`;
 - Execution: `Not Started`;
 - Regression Suite: `Not Started`.
 
 ## Next Steps
 
-- Define the future scenario catalog.
-- Create a gold standard scenario in a later step.
-- Review and stabilize the gold scenario before adding catalog scenarios.
-- Execute evaluation only after scenarios and expected results exist.
+- Execute evaluation using the ready scenarios and expected results.
 - Review coverage gaps before forming a regression suite.
