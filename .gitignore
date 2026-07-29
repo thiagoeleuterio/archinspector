@@ -3,3 +3,21 @@
 .idea/
 *.tmp
 *.bak
+
+# .NET build artifacts
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+
+# User-specific files
+*.user
+*.suo
+
+# Test results and coverage
+TestResults/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
