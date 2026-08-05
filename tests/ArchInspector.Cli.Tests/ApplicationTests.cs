@@ -83,6 +83,84 @@ public sealed class ApplicationTests
         Assert.Equal("report body", File.ReadAllText(Path.Combine(directory.Path, "EXECUTIVE_REPORT.md")));
     }
 
+    [Fact]
+    public void Run_WithMetadataArrayJson_ShouldAnalyzeRules()
+    {
+        using var directory = new TempDirectory();
+        var rulesPath = Path.Combine(directory.Path, "rules.json");
+        File.WriteAllText(
+            rulesPath,
+            """
+            [
+              {
+                "ruleId": "HEX-003",
+                "taxonomyReference": "HEX-003",
+                "outcome": 0,
+                "severity": 3,
+                "message": "Dependency direction found.",
+                "repository": "repo",
+                "filePath": "src/Infrastructure.csproj",
+                "metadata": [
+                  {
+                    "key": "reference",
+                    "value": "Application"
+                  }
+                ]
+              }
+            ]
+            """);
+        var analyzer = new FakeArchitectureAnalyzer();
+        var application = CreateApplication(analyzer);
+
+        var exitCode = application.Run(["analyze", rulesPath]);
+
+        Assert.Equal(Application.SuccessExitCode, exitCode);
+        Assert.NotNull(analyzer.RuleResults);
+        var ruleResult = Assert.Single(analyzer.RuleResults);
+        Assert.Equal("Application", ruleResult.Metadata["reference"]);
+    }
+
+    [Fact]
+    public void Run_WithSolution_ShouldScanProjectsAndWriteExecutiveReportToArchInspectorDirectory()
+    {
+        using var directory = new TempDirectory();
+        var solutionPath = Path.Combine(directory.Path, "Sample.sln");
+        CreateProject(
+            directory.Path,
+            "Sample.Application",
+            "Sample.Application.csproj",
+            sourceFiles: ["Ports/IClock.cs"]);
+        CreateProject(
+            directory.Path,
+            "Sample.Infrastructure",
+            "Sample.Infrastructure.csproj",
+            projectReferences: ["..\\Sample.Application\\Sample.Application.csproj"],
+            sourceFiles: ["Adapters/ClockAdapter.cs"]);
+        File.WriteAllText(
+            solutionPath,
+            """
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Application", "Sample.Application\Sample.Application.csproj", "{11111111-1111-1111-1111-111111111111}"
+            EndProject
+            Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Infrastructure", "Sample.Infrastructure\Sample.Infrastructure.csproj", "{22222222-2222-2222-2222-222222222222}"
+            EndProject
+            """);
+        var analyzer = new FakeArchitectureAnalyzer();
+        var reportGenerator = new FakeExecutiveReportGenerator("solution report");
+        var application = CreateApplication(analyzer, reportGenerator);
+
+        var exitCode = application.Run(["analyze", solutionPath]);
+
+        Assert.Equal(Application.SuccessExitCode, exitCode);
+        Assert.NotNull(analyzer.RuleResults);
+        Assert.Contains(analyzer.RuleResults, rule => rule.RuleId == "HEX-001");
+        Assert.Contains(analyzer.RuleResults, rule => rule.RuleId == "HEX-003");
+        Assert.Contains(analyzer.RuleResults, rule => rule.RuleId == "HEX-005");
+        Assert.Equal(
+            "solution report",
+            File.ReadAllText(Path.Combine(directory.Path, ".archinspector", "EXECUTIVE_REPORT.md")));
+    }
+
     private static Application CreateApplication(
         IArchitectureAnalyzer? analyzer = null,
         IExecutiveReportGenerator? reportGenerator = null)
@@ -90,6 +168,33 @@ public sealed class ApplicationTests
         return new Application(
             analyzer ?? new FakeArchitectureAnalyzer(),
             reportGenerator ?? new FakeExecutiveReportGenerator("report"));
+    }
+
+    private static void CreateProject(
+        string solutionDirectory,
+        string projectName,
+        string projectFileName,
+        string[]? projectReferences = null,
+        string[]? sourceFiles = null)
+    {
+        var projectDirectory = Path.Combine(solutionDirectory, projectName);
+        Directory.CreateDirectory(projectDirectory);
+        File.WriteAllText(
+            Path.Combine(projectDirectory, projectFileName),
+            $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <ItemGroup>
+            {string.Join(Environment.NewLine, (projectReferences ?? []).Select(reference => $"    <ProjectReference Include=\"{reference}\" />"))}
+              </ItemGroup>
+            </Project>
+            """);
+
+        foreach (var sourceFile in sourceFiles ?? [])
+        {
+            var sourcePath = Path.Combine(projectDirectory, sourceFile);
+            Directory.CreateDirectory(Path.GetDirectoryName(sourcePath)!);
+            File.WriteAllText(sourcePath, "namespace Sample;");
+        }
     }
 
     private sealed class FakeArchitectureAnalyzer : IArchitectureAnalyzer
